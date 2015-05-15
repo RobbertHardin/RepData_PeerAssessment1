@@ -91,11 +91,7 @@ install.packages( c( "dplyr", "lattice" )
 ```
 
 ```
-## package 'dplyr' successfully unpacked and MD5 sums checked
-## package 'lattice' successfully unpacked and MD5 sums checked
-## 
-## The downloaded binary packages are in
-## 	C:\Users\naam\AppData\Local\Temp\Rtmpc7KTcn\downloaded_packages
+## Error in install.packages : Updating loaded packages
 ```
 
 ```r
@@ -162,7 +158,8 @@ median_tnospd <- median( total_steps_by_day$total_steps
                          )
 ```
 
-As a bonus we get the mean and median of the total number of steps taken per day: 10766.1886792453 is the former and 10765 is the latter. 
+### Mean and median number of steps taken each day
+As a bonus we get the *mean* and *median* of the total number of steps taken per day: 10766.1886792453 is the former and 10765 is the latter. 
 
 ## What is the average daily activity pattern?
 
@@ -190,9 +187,9 @@ with( average_steps_by_interval
       , plot( interval
               , average_steps
               , type = "l" 
-              , xlab = "Interval (timeserie)"
-              , ylab = "Average steps"
-              , main = "Average steps per interval"
+              , xlab = "5-minute interval"
+              , ylab = "Average number of steps (all day)"
+              , main = "Average number of steps (all day) per interval"
               ) 
       )
 ```
@@ -201,6 +198,7 @@ with( average_steps_by_interval
 
 Please note you have to read the x-axis as ranging from 00:00 to 23:55, not from 0 to 2,355. This is because `interval` is a time serie.
 
+### 5-minute interval containing maximum number of steps
 To find the 5-minute interval containing the maximum number of steps, I first use `which.max()` that returns the *index* of this interval (`104`). Now you migth think, I know I did, that the requested interval is `(104-1)*5`. But in reality it is `835`, meaning 8:35 AM:
 
 
@@ -268,6 +266,7 @@ nomv
 
 So, the number of missing values in `amd` is 2304.
 
+### Strategy and code for imputing missing data
 My strategy for filling the missing values is to calculate the average number of steps in an interval over the full period. This way I hope the differences averages out. It's also convenient for I already have `average_steps_by_interval` :-) So I join `average_steps_by_interval` to `td_amd` on `interval`. This gives me a data frame table with `steps` and `average_steps`. Next I use `dplyr::mutate` to create a new column `corrected_steps` that contains `steps` when present and `average_steps` if not. There is an extra twist, `steps` is an integer but `average_steps` is a numeric, so I round `average_steps` and convert it to an integer with `as.integer( round( average_steps, 0 ) )`.  Finally I remove `steps` and `average_steps` and rename `corrected_steps` to `steps`.
 
 
@@ -426,6 +425,9 @@ lattice::xyplot(average_steps ~ interval | daytype
                 , data = td_amd_extended_average_steps_by_interval
                 , type = "l"
                 , layout = c(1, 2)
+                , xlab = "5-minute interval"
+                , ylab = "Average number of steps"
+                , title = "Comparing average number of steps across weekdays and weekends"
                 )
 ```
 
